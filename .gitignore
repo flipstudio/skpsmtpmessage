@@ -6,4 +6,4 @@
 build/
 xcuserdata/
 .LSOverride
-
+*.DS_Store
