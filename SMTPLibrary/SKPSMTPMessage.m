@@ -63,6 +63,7 @@ NSString *kSKPSMTPPartContentTransferEncodingKey = @"kSKPSMTPPartContentTransfer
             delegate, connectTimer, connectTimeout, watchdogTimer, validateSSLChain;
 @synthesize ccEmail;
 @synthesize bccEmail;
+@synthesize runLoop;
 
 #pragma mark -
 #pragma mark Memory & Lifecycle
@@ -104,6 +105,7 @@ NSString *kSKPSMTPPartContentTransferEncodingKey = @"kSKPSMTPPartContentTransfer
 	self.bccEmail = nil;
     self.parts = nil;
     self.inputString = nil;
+	self.runLoop = nil;
     
     [inputStream release];
     inputStream = nil;
@@ -246,6 +248,9 @@ NSString *kSKPSMTPPartContentTransferEncodingKey = @"kSKPSMTPPartContentTransfer
     NSAssert(fromEmail, @"send requires fromEmail");
     NSAssert(toEmail, @"send requires toEmail");
     NSAssert(parts, @"send requires parts");
+	
+	if (runLoop == NULL)
+		runLoop = [NSRunLoop currentRunLoop];
     
     NSError *error = nil;
     if (![self preflightCheckWithError:&error]) {
@@ -290,9 +295,9 @@ NSString *kSKPSMTPPartContentTransferEncodingKey = @"kSKPSMTPPartContentTransfer
         [inputStream setDelegate:self];
         [outputStream setDelegate:self];
         
-        [inputStream scheduleInRunLoop:[NSRunLoop currentRunLoop]
+        [inputStream scheduleInRunLoop:runLoop
                                forMode:NSRunLoopCommonModes];
-        [outputStream scheduleInRunLoop:[NSRunLoop currentRunLoop]
+        [outputStream scheduleInRunLoop:runLoop
                                 forMode:NSRunLoopCommonModes];
         [inputStream open];
         [outputStream open];
@@ -345,7 +350,7 @@ NSString *kSKPSMTPPartContentTransferEncodingKey = @"kSKPSMTPPartContentTransfer
         {
             [self stopWatchdog];
             [stream close];
-            [stream removeFromRunLoop:[NSRunLoop currentRunLoop]
+            [stream removeFromRunLoop:runLoop
                               forMode:NSDefaultRunLoopMode];
             [stream release];
             stream = nil; // stream is ivar, so reinit it
@@ -908,13 +913,13 @@ NSString *kSKPSMTPPartContentTransferEncodingKey = @"kSKPSMTPPartContentTransfer
     if (sendState == kSKPSMTPConnecting)
     {
         [inputStream close];
-        [inputStream removeFromRunLoop:[NSRunLoop currentRunLoop]
+        [inputStream removeFromRunLoop:runLoop
                                forMode:NSDefaultRunLoopMode];
         [inputStream release];
         inputStream = nil;
         
         [outputStream close];
-        [outputStream removeFromRunLoop:[NSRunLoop currentRunLoop]
+        [outputStream removeFromRunLoop:runLoop
                                 forMode:NSDefaultRunLoopMode];
         [outputStream release];
         outputStream = nil;
@@ -931,13 +936,13 @@ NSString *kSKPSMTPPartContentTransferEncodingKey = @"kSKPSMTPPartContentTransfer
 - (void)cleanUpStreams
 {
     [inputStream close];
-    [inputStream removeFromRunLoop:[NSRunLoop currentRunLoop]
+    [inputStream removeFromRunLoop:runLoop
                            forMode:NSDefaultRunLoopMode];
     [inputStream release];
     inputStream = nil;
     
     [outputStream close];
-    [outputStream removeFromRunLoop:[NSRunLoop currentRunLoop]
+    [outputStream removeFromRunLoop:runLoop
                             forMode:NSDefaultRunLoopMode];
     [outputStream release];
     outputStream = nil;

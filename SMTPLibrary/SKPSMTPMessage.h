@@ -80,6 +80,7 @@ extern NSString *kSKPSMTPPartContentTransferEncodingKey;
     NSString *pass;
     NSString *relayHost;
     NSArray *relayPorts;
+	NSRunLoop *runLoop;
     
     NSString *subject;
     NSString *fromEmail;
@@ -119,6 +120,7 @@ extern NSString *kSKPSMTPPartContentTransferEncodingKey;
 @property(nonatomic, retain) NSString *login;
 @property(nonatomic, retain) NSString *pass;
 @property(nonatomic, retain) NSString *relayHost;
+@property(nonatomic, retain) NSRunLoop *runLoop;
 
 @property(nonatomic, retain) NSArray *relayPorts;
 @property(nonatomic, assign) BOOL requiresAuth;
